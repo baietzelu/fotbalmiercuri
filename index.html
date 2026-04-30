@@ -3,94 +3,88 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fotbal Prezență</title>
+  <title>Fotbal Prezență - Miercuri</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #f0f0f0; margin: 0; padding: 15px; }
-    .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
-    button { width: 100%; padding: 15px; margin: 10px 0; font-size: 18px; border: none; border-radius: 8px; cursor: pointer; }
-    .camp { background: #1a73e8; color: white; }
-    .portar { background: #d93025; color: white; }
+    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 15px; }
+    .container { max-width: 650px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+    h1 { text-align: center; color: #1a73e8; }
+    select, button { width: 100%; padding: 15px; margin: 10px 0; font-size: 18px; border-radius: 8px; }
+    button { border: none; cursor: pointer; font-weight: bold; }
+    .camp-btn { background: #1a73e8; color: white; }
+    .portar-btn { background: #d93025; color: white; }
+    .list { margin-top: 20px; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>⚽ Fotbal Prezență</h1>
-    <p><strong>Data:</strong> Miercuri 29.04.2026</p>
+    <p style="text-align:center;"><strong>Miercuri 29 Aprilie 2026 - Ora 20:30</strong></p>
 
-    <select id="nume" style="width:100%; padding:12px; font-size:17px; margin:15px 0;">
-      <option value="">Alege jucătorul</option>
+    <select id="nume-select">
+      <option value="">— Alege jucătorul —</option>
       <option value="Alfred">Alfred</option>
       <option value="Bosoi">Bosoi</option>
       <option value="Cosmin TV">Cosmin TV</option>
       <option value="Edy">Edy</option>
       <option value="Găină">Găină</option>
       <option value="Gox">Gox</option>
+      <option value="Mirică Alex">Mirică Alex</option>
       <option value="Andrei">Andrei (Portar)</option>
       <option value="Anini">Anini (Portar)</option>
     </select>
 
-    <button onclick="confirma('camp')" class="camp">✅ Confirmă ca JUCĂTOR DE CÂMP</button>
-    <button onclick="confirma('portar')" class="portar">🧤 Confirmă ca PORTAR</button>
+    <button onclick="confirma('camp')" class="camp-btn">✅ Confirmă ca JUCĂTOR DE CÂMP</button>
+    <button onclick="confirma('portar')" class="portar-btn">🧤 Confirmă ca PORTAR</button>
 
-    <h2>Prezență Live:</h2>
-    <div id="lista"></div>
+    <div class="list">
+      <h2>Prezență Live:</h2>
+      <div id="prezenta"></div>
+    </div>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <script>
+    // === AICI TREBUIE SĂ PUI CONFIGUL TĂU FIREBASE ===
     const firebaseConfig = {
-      // // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyCoByFCSCVkoKWvKm4hpijn7H9JrBahu8E",
-  authDomain: "fotbalmiercuri-93d29.firebaseapp.com",
-  databaseURL: "https://fotbalmiercuri-93d29-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "fotbalmiercuri-93d29",
-  storageBucket: "fotbalmiercuri-93d29.firebasestorage.app",
-  messagingSenderId: "690306258465",
-  appId: "1:690306258465:web:e8d4217e913613a4d5b560",
-  measurementId: "G-H4FBVFCK39"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+      apiKey: "AIzAxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      authDomain: "fotbal-prezenta.firebaseapp.com",
+      databaseURL: "https://fotbal-prezenta-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "fotbal-prezenta",
+      storageBucket: "fotbal-prezenta.appspot.com",
+      messagingSenderId: "123456789",
+      appId: "1:123456789:web:xxxxxxxxxxxxxxxx"
     };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const ref = db.ref('prezenta');
+    const prezentaRef = db.ref('prezenta_miercuri');
 
     function confirma(tip) {
-      const nume = document.getElementById('nume').value;
-      if (!nume) return alert("Alege un nume din listă!");
-      
-      ref.child(tip).child(nume).set(true);
-      alert(nume + " a fost confirmat!");
+      const nume = document.getElementById('nume-select').value;
+      if (!nume) return alert("Te rog alege un nume!");
+
+      prezentaRef.child(tip).child(nume).set(true);
+      alert(nume + " a fost confirmat ca " + (tip === 'camp' ? 'câmp' : 'portar') + "!");
     }
 
     // Actualizare live
-    ref.on('value', (snapshot) => {
+    prezentaRef.on('value', (snapshot) => {
       const data = snapshot.val() || {};
-      let html = '';
+      let html = "";
+
       if (data.camp) {
-        html += '<h3>Câmp:</h3><ul>';
+        html += "<h3>⚽ Câmp:</h3><ul>";
         Object.keys(data.camp).forEach(n => html += `<li>${n}</li>`);
-        html += '</ul>';
+        html += "</ul>";
       }
       if (data.portar) {
-        html += '<h3>Portari:</h3><ul>';
+        html += "<h3>🧤 Portari:</h3><ul>";
         Object.keys(data.portar).forEach(n => html += `<li>${n}</li>`);
-        html += '</ul>';
+        html += "</ul>";
       }
-      document.getElementById('lista').innerHTML = html || '<p>Încă nu e nimeni confirmat.</p>';
+
+      document.getElementById('prezenta').innerHTML = html || "<p>Încă nu e nimeni confirmat.</p>";
     });
   </script>
 </body>
