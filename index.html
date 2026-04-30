@@ -40,7 +40,28 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <script>
     const firebaseConfig = {
-      // <<< LIPEȘTE AICI TOT CE AI COPIAT DE LA FIREBASE >>>
+      // // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyCoByFCSCVkoKWvKm4hpijn7H9JrBahu8E",
+  authDomain: "fotbalmiercuri-93d29.firebaseapp.com",
+  databaseURL: "https://fotbalmiercuri-93d29-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "fotbalmiercuri-93d29",
+  storageBucket: "fotbalmiercuri-93d29.firebasestorage.app",
+  messagingSenderId: "690306258465",
+  appId: "1:690306258465:web:e8d4217e913613a4d5b560",
+  measurementId: "G-H4FBVFCK39"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
     };
 
     firebase.initializeApp(firebaseConfig);
