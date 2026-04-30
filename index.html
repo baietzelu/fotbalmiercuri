@@ -3,98 +3,137 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fotbal Miercuri</title>
+  <title>Miercuri 29.04 — Fotbal</title>
   <style>
-    body {font-family: Arial; background:#f4f4f4; margin:0; padding:15px;}
-    .container {max-width:650px; margin:auto; background:white; padding:20px; border-radius:12px; box-shadow:0 0 20px rgba(0,0,0,0.1);}
-    button, select {width:100%; padding:15px; margin:10px 0; font-size:18px; border-radius:8px;}
-    button {border:none; font-weight:bold; cursor:pointer;}
-    .camp {background:#1a73e8; color:white;}
-    .portar {background:#d93025; color:white;}
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8f9fa; margin:0; padding:15px; }
+    .container { max-width: 620px; margin: auto; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); overflow: hidden; }
+    header { background: linear-gradient(135deg, #1a73e8, #34a853); color: white; padding: 20px; text-align: center; }
+    .section { padding: 18px 20px; border-bottom: 1px solid #eee; }
+    button { width: 100%; padding: 14px; margin: 8px 0; border: none; border-radius: 8px; font-size: 1.1em; cursor: pointer; }
+    .confirm-btn { background: #1a73e8; color: white; }
+    .portar-btn { background: #d93025; color: white; }
+    .random-btn { background: #fbbc05; color: #333; font-weight: bold; }
+    .admin-btn { background: #ea4335; font-size: 0.95em; }
+    ul { list-style: none; padding: 0; }
+    li { padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
+    .status { font-size: 1.4em; font-weight: bold; text-align: center; color: #1a73e8; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>⚽ Fotbal Prezență</h1>
-    <p style="text-align:center"><strong>Miercuri 29.04.2026 - 20:30</strong></p>
+    <header><h1>Miercuri 29.04 — Fotbal</h1></header>
 
-    <select id="nume">
-      <option value="">Alege jucătorul</option>
-      <option value="Alfred">Alfred</option>
-      <option value="Bosoi">Bosoi</option>
-      <option value="Cosmin TV">Cosmin TV</option>
-      <option value="Edy">Edy</option>
-      <option value="Găină">Găină</option>
-      <option value="Gox">Gox</option>
-      <option value="Mirică Alex">Mirică Alex</option>
-      <option value="Andrei">Andrei (Portar)</option>
-      <option value="Anini">Anini (Portar)</option>
-    </select>
+    <div class="section">
+      <p>📅 Miercuri, 29 Aprilie 2026</p>
+      <p>🕐 Ora 20:30 📍 Terenul 1 LPS Live</p>
+    </div>
 
-    <button onclick="confirma('camp')" class="camp">✅ Confirmă CÂMP</button>
-    <button onclick="confirma('portar')" class="portar">🧤 Confirmă PORTAR</button>
+    <div class="section">
+      <p><strong>Se colectează prezența</strong></p>
+      <p class="status" id="total">0/12 confirmați</p>
+    </div>
 
-    <h2>Prezență Live:</h2>
-    <div id="lista"></div>
+    <!-- ADMIN LOGIN -->
+    <div class="section" id="admin-login">
+      <button onclick="loginAdmin()" class="admin-btn">🔑 Admin Panel</button>
+    </div>
+
+    <!-- Confirmare normală -->
+    <div class="section">
+      <h2>📋 Confirmă prezența</h2>
+      <button onclick="addPlayerPrompt()" class="confirm-btn">➕ Adaugă jucător nou</button>
+      <button onclick="confirmaPrezenta()" class="confirm-btn">✅ Confirmă prezența mea</button>
+    </div>
+
+    <!-- Prezență -->
+    <div class="section">
+      <h2>✅ Prezență Live</h2>
+      <div id="prezenta-list"></div>
+    </div>
+
+    <div class="section">
+      <button onclick="genereazaEchipe()" class="random-btn">🎲 Generează Echipe Aleatoriu (5+1)</button>
+    </div>
+
+    <div id="echipe" class="section" style="display:none;"></div>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <script>
-    const firebaseConfig = {
-      // // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+    let players = { camp: [], portari: [] };
+    let isAdmin = false;
+    const ADMIN_PASS = "admin123"; // Schimbă parola aici!
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyCoByFCSCVkoKWvKm4hpijn7H9JrBahu8E",
-  authDomain: "fotbalmiercuri-93d29.firebaseapp.com",
-  databaseURL: "https://fotbalmiercuri-93d29-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "fotbalmiercuri-93d29",
-  storageBucket: "fotbalmiercuri-93d29.firebasestorage.app",
-  messagingSenderId: "690306258465",
-  appId: "1:690306258465:web:e8d4217e913613a4d5b560",
-  measurementId: "G-H4FBVFCK39"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-      // Pentru moment lăsăm fără ca să meargă măcar butoanele
-    };
-
-    // Versiune simplă fără Firebase pentru test
-    let prezenta = {camp: [], portari: []};
-
-    function confirma(tip) {
-      const nume = document.getElementById('nume').value;
-      if (!nume) return alert("Alege un nume!");
-
-      if (tip === 'camp') prezenta.camp.push(nume);
-      else prezenta.portari.push(nume);
-
-      alert(nume + " confirmat!");
-      updateLista();
+    function updateUI() {
+      let html = `<p class="status">${players.camp.length + players.portari.length}/12 confirmați</p>`;
+      
+      if (players.camp.length) {
+        html += `<h3>⚽ Câmp (${players.camp.length}/10)</h3><ul>`;
+        players.camp.forEach(p => html += `<li>${p}</li>`);
+        html += `</ul>`;
+      }
+      if (players.portari.length) {
+        html += `<h3>🧤 Portari (${players.portari.length}/2)</h3><ul>`;
+        players.portari.forEach(p => html += `<li>${p}</li>`);
+        html += `</ul>`;
+      }
+      document.getElementById('prezenta-list').innerHTML = html;
     }
 
-    function updateLista() {
-      let html = "";
-      if (prezenta.camp.length) {
-        html += "<h3>⚽ Câmp</h3><ul>";
-        prezenta.camp.forEach(n => html += `<li>${n}</li>`);
-        html += "</ul>";
+    function addPlayerPrompt() {
+      const nume = prompt("Introdu numele jucătorului:");
+      if (!nume) return;
+      const poz = confirm("Este portar?") ? "portari" : "camp";
+      if (!players[poz].includes(nume)) {
+        players[poz].push(nume);
+        updateUI();
       }
-      if (prezenta.portari.length) {
-        html += "<h3>🧤 Portari</h3><ul>";
-        prezenta.portari.forEach(n => html += `<li>${n}</li>`);
-        html += "</ul>";
-      }
-      document.getElementById('lista').innerHTML = html || "<p>Nimeni confirmat încă...</p>";
     }
-  </script>
-</body>
-</html>
+
+    function confirmaPrezenta() {
+      const nume = prompt("Introdu numele tău:");
+      if (!nume) return;
+      const poz = confirm("Ești portar?") ? "portari" : "camp";
+      if (!players[poz].includes(nume)) {
+        players[poz].push(nume);
+        updateUI();
+      } else {
+        alert("Deja ești confirmat!");
+      }
+    }
+
+    function loginAdmin() {
+      const pass = prompt("Introdu parola admin:");
+      if (pass === ADMIN_PASS) {
+        isAdmin = true;
+        alert("✅ Ai intrat ca Admin!");
+      } else {
+        alert("Parolă greșită!");
+      }
+    }
+
+    function genereazaEchipe() {
+      if (players.camp.length < 10 || players.portari.length < 2) {
+        return alert("Nu sunt suficienți jucători!");
+      }
+
+      const campShuf = [...players.camp].sort(() => Math.random() - 0.5);
+      const portShuf = [...players.portari].sort(() => Math.random() - 0.5);
+
+      let html = `
+        <h2>🎯 Echipele Generate</h2>
+        <div style="background:#f8f9fa;padding:15px;border-radius:10px;margin:10px 0;">
+          <h3>🔵 Echipa 1</h3>
+          <p><strong>Portar:</strong> ${portShuf[0]}</p>
+          <ul>${campShuf.slice(0,5).map(n=>`<li>${n}</li>`).join('')}</ul>
+        </div>
+        <div style="background:#f8f9fa;padding:15px;border-radius:10px;margin:10px 0;">
+          <h3>🔴 Echipa 2</h3>
+          <p><strong>Portar:</strong> ${portShuf[1]}</p>
+          <ul>${campShuf.slice(5,10).map(n=>`<li>${n}</li>`).join('')}</ul>
+        </div>`;
+      
+      document.getElementById('echipe').innerHTML = html;
+      document.getElementById('echipe').style.display = 'block';
+    }
+
+    //
