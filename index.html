@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fotbal Prezență</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f0f0; margin: 0; padding: 15px; }
+    .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
+    button { width: 100%; padding: 15px; margin: 10px 0; font-size: 18px; border: none; border-radius: 8px; cursor: pointer; }
+    .camp { background: #1a73e8; color: white; }
+    .portar { background: #d93025; color: white; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>⚽ Fotbal Prezență</h1>
+    <p><strong>Data:</strong> Miercuri 29.04.2026</p>
+
+    <select id="nume" style="width:100%; padding:12px; font-size:17px; margin:15px 0;">
+      <option value="">Alege jucătorul</option>
+      <option value="Alfred">Alfred</option>
+      <option value="Bosoi">Bosoi</option>
+      <option value="Cosmin TV">Cosmin TV</option>
+      <option value="Edy">Edy</option>
+      <option value="Găină">Găină</option>
+      <option value="Gox">Gox</option>
+      <option value="Andrei">Andrei (Portar)</option>
+      <option value="Anini">Anini (Portar)</option>
+    </select>
+
+    <button onclick="confirma('camp')" class="camp">✅ Confirmă ca JUCĂTOR DE CÂMP</button>
+    <button onclick="confirma('portar')" class="portar">🧤 Confirmă ca PORTAR</button>
+
+    <h2>Prezență Live:</h2>
+    <div id="lista"></div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      // <<< LIPEȘTE AICI TOT CE AI COPIAT DE LA FIREBASE >>>
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const ref = db.ref('prezenta');
+
+    function confirma(tip) {
+      const nume = document.getElementById('nume').value;
+      if (!nume) return alert("Alege un nume din listă!");
+      
+      ref.child(tip).child(nume).set(true);
+      alert(nume + " a fost confirmat!");
+    }
+
+    // Actualizare live
+    ref.on('value', (snapshot) => {
+      const data = snapshot.val() || {};
+      let html = '';
+      if (data.camp) {
+        html += '<h3>Câmp:</h3><ul>';
+        Object.keys(data.camp).forEach(n => html += `<li>${n}</li>`);
+        html += '</ul>';
+      }
+      if (data.portar) {
+        html += '<h3>Portari:</h3><ul>';
+        Object.keys(data.portar).forEach(n => html += `<li>${n}</li>`);
+        html += '</ul>';
+      }
+      document.getElementById('lista').innerHTML = html || '<p>Încă nu e nimeni confirmat.</p>';
+    });
+  </script>
+</body>
+</html>
