@@ -5,22 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fotbal Prezență - Miercuri</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 15px; }
-    .container { max-width: 650px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 10px; }
+    .container { max-width: 650px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 0 20px rgba(0,0,0,0.15); }
     h1 { text-align: center; color: #1a73e8; }
-    select, button { width: 100%; padding: 15px; margin: 10px 0; font-size: 18px; border-radius: 8px; }
-    button { border: none; cursor: pointer; font-weight: bold; }
-    .camp-btn { background: #1a73e8; color: white; }
-    .portar-btn { background: #d93025; color: white; }
-    .list { margin-top: 20px; }
+    select, button { width: 100%; padding: 15px; margin: 10px 0; font-size: 17px; border-radius: 8px; }
+    button { border: none; font-weight: bold; cursor: pointer; }
+    .camp { background: #1a73e8; color: white; }
+    .portar { background: #d93025; color: white; }
+    .list { margin-top: 25px; font-size: 18px; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>⚽ Fotbal Prezență</h1>
-    <p style="text-align:center;"><strong>Miercuri 29 Aprilie 2026 - Ora 20:30</strong></p>
+    <p style="text-align:center; font-size:18px;"><strong>Miercuri 29 Aprilie 2026 • Ora 20:30</strong></p>
 
-    <select id="nume-select">
+    <select id="nume">
       <option value="">— Alege jucătorul —</option>
       <option value="Alfred">Alfred</option>
       <option value="Bosoi">Bosoi</option>
@@ -33,58 +33,54 @@
       <option value="Anini">Anini (Portar)</option>
     </select>
 
-    <button onclick="confirma('camp')" class="camp-btn">✅ Confirmă ca JUCĂTOR DE CÂMP</button>
-    <button onclick="confirma('portar')" class="portar-btn">🧤 Confirmă ca PORTAR</button>
+    <button onclick="confirma('camp')" class="camp">✅ Confirmă ca JUCĂTOR DE CÂMP</button>
+    <button onclick="confirma('portar')" class="portar">🧤 Confirmă ca PORTAR</button>
 
     <div class="list">
       <h2>Prezență Live:</h2>
-      <div id="prezenta"></div>
+      <div id="lista"></div>
     </div>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <script>
-    // === AICI TREBUIE SĂ PUI CONFIGUL TĂU FIREBASE ===
     const firebaseConfig = {
-      apiKey: "AIzAxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-      authDomain: "fotbal-prezenta.firebaseapp.com",
-      databaseURL: "https://fotbal-prezenta-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "fotbal-prezenta",
-      storageBucket: "fotbal-prezenta.appspot.com",
-      messagingSenderId: "123456789",
-      appId: "1:123456789:web:xxxxxxxxxxxxxxxx"
+      // AICI TREBUIE SĂ PUI CONFIGUL TĂU DIN FIREBASE !!!
+      apiKey: "",
+      authDomain: "",
+      databaseURL: "",
+      projectId: "",
+      storageBucket: "",
+      messagingSenderId: "",
+      appId: ""
     };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const prezentaRef = db.ref('prezenta_miercuri');
+    const ref = db.ref('prezenta');
 
     function confirma(tip) {
-      const nume = document.getElementById('nume-select').value;
-      if (!nume) return alert("Te rog alege un nume!");
-
-      prezentaRef.child(tip).child(nume).set(true);
-      alert(nume + " a fost confirmat ca " + (tip === 'camp' ? 'câmp' : 'portar') + "!");
+      const nume = document.getElementById('nume').value;
+      if (!nume) return alert("Alege un nume din listă!");
+      ref.child(tip).child(nume).set(true);
+      alert(nume + " confirmat!");
     }
 
-    // Actualizare live
-    prezentaRef.on('value', (snapshot) => {
-      const data = snapshot.val() || {};
-      let html = "";
-
+    ref.on('value', (snap) => {
+      const data = snap.val() || {};
+      let html = '';
       if (data.camp) {
-        html += "<h3>⚽ Câmp:</h3><ul>";
+        html += '<h3>⚽ Câmp</h3><ul>';
         Object.keys(data.camp).forEach(n => html += `<li>${n}</li>`);
-        html += "</ul>";
+        html += '</ul>';
       }
       if (data.portar) {
-        html += "<h3>🧤 Portari:</h3><ul>";
+        html += '<h3>🧤 Portari</h3><ul>';
         Object.keys(data.portar).forEach(n => html += `<li>${n}</li>`);
-        html += "</ul>";
+        html += '</ul>';
       }
-
-      document.getElementById('prezenta').innerHTML = html || "<p>Încă nu e nimeni confirmat.</p>";
+      document.getElementById('lista').innerHTML = html || '<p>Nimeni confirmat încă...</p>';
     });
   </script>
 </body>
